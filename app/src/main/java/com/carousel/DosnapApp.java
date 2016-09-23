@@ -9,4 +9,7 @@ public class DosnapApp extends Application {
 
 	public static String apiHost = "http://app.dosnap.com/";
 	public static String apiDir = "api/";
+
+	public static String identifier = "";
+	public static String token = "";
 }

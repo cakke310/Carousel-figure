@@ -23,8 +23,10 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.carousel.bean.MainPhotoBean;
 import com.carousel.bean.MatchListBean;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -43,11 +45,11 @@ public class BannerView extends FrameLayout {
 	private Context mContext;
 
 	// 自定义轮播图的资源ID
-	private List<MatchListBean> elements;
-
+	private List<MainPhotoBean.MatchListBean> elements;
 	private LinearLayout dotLayout;
 	private ViewPager viewPager;
-	private Handler handler;
+	private Handler handler = new Handler();
+	private TextView title;
 
 	public BannerView(Context context) {
 		this(context, null);
@@ -64,11 +66,11 @@ public class BannerView extends FrameLayout {
 		elements = new ArrayList<>();
 		viewPager = (ViewPager) findViewById(R.id.viewPager);
 		dotLayout = (LinearLayout) findViewById(R.id.dotLayout);
+		title = (TextView) findViewById(R.id.title);
 		autoPlayTask = new AutoPlayTask();
-		initData();
 	}
 
-	public void set(List<MatchListBean> data) {
+	public void set(List<MainPhotoBean.MatchListBean> data) {
 		elements.clear();
 		elements.addAll(data);
 		if (data.size() > 0) {
@@ -81,30 +83,16 @@ public class BannerView extends FrameLayout {
 		}
 	}
 
-	/**
-	 * 初始化相关Data
-	 */
-	private void initData() {
-//		imageList = new ArrayList<>();
-	}
 
 	/**
 	 * 初始化Views等UI
 	 */
-	private void initUI(List<MatchListBean> data) {
+	private void initUI(List<MainPhotoBean.MatchListBean> data) {
 		dotLayout.removeAllViews();
-//		imageList.clear();
 		for (int i = 0; i < data.size(); i++) {
-			try {
-				String imgurl = DosnapApp.apiHost + data.get(i).imgurl;
-//				imageList.add(imgurl);
 				if(data.size()>1) {
 					dotLayout.addView(addDotView(mContext, i));
 				}
-			} catch (Exception e) {
-				// TODO: handle exception
-				e.printStackTrace();
-			}
 		}
 		viewPager.setAdapter(new MyPagerAdapter());
 		if(elements.size()>1) {
@@ -135,7 +123,6 @@ public class BannerView extends FrameLayout {
 		@Override
 		public void run() {
 			if(has_auto_play){
-				//has_auto_play = false;
 				viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
 				handler.postDelayed(this, AUTO_PLAY_TIME);
 			}
@@ -194,27 +181,12 @@ public class BannerView extends FrameLayout {
 			int i = position % elements.size();
 			SimpleDraweeView photoView = new SimpleDraweeView(getContext());
 			DraweeController controller = ConfigConstants.getDraweeController(
-					ConfigConstants.getImageRequest(photoView, DosnapApp.apiHost + elements.get(i).imgurl), photoView);
+					ConfigConstants.getImageRequest(photoView, DosnapApp.apiHost + elements.get(i).getImgurl()), photoView);
 			photoView.setController(controller);
-			MatchListBean item = elements.get(i >= elements.size() ? i % elements.size() : i);
-			photoView.setTag(item.id);
-			int eventtype = item.eventtype;
-			if(eventtype==3||eventtype==6) {
-				photoView.setTag(R.id.tag_id, eventtype);
-				photoView.setOnClickListener(mListener);
-			} else if(eventtype==2) {
-				photoView.setTag(item.toString());
-				photoView.setOnClickListener(aListener);
-			} else if(eventtype==4) {
-				photoView.setTag(item.toString());
-				photoView.setOnClickListener(topicListener);
-			}else if(eventtype==5) {
-				photoView.setTag(item.toString());
-				photoView.setOnClickListener(h5Listener);
-			} else {
-				photoView.setOnClickListener(otherListener);
-			}
+			elements.get(i >= elements.size() ? i % elements.size() : i);//防止错乱
 			((ViewPager) container).addView(photoView);
+			String mTitle = elements.get(i).getTitle();
+			title.setText(mTitle);
 			return photoView;
 		}
 
