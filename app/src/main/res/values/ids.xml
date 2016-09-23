@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<item type="id" name="tag_num"></item>
+	<item type="id" name="tag_status"></item>
+	<item type="id" name="tag_userid"></item>
+	<item type="id" name="tag_haslaud"></item>
+	<item type="id" name="tag_laud"></item>
+	<item type="id" name="tag_photoid"></item>
+	<item type="id" name="tag_aid"></item>
+	<item type="id" name="tag_imgurl"></item>
+	<item type="id" name="tag_username"></item>
+	<item type="id" name="tag_op"></item>
+	<item type="id" name="tag_sdata"></item>
+	<item type="id" name="tag_id"></item>
+	<item type="id" name="tag_photolayout"></item>
+	<item type="id" name="tag_ulayout"></item>
+	<item type="id" name="tag_lbslayout"></item>
+	<item type="id" name="tag_matchlayout"></item>
+</resources>
