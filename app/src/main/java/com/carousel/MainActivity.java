@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onResponse(String response, int id) {
-            LogUtil.e(response);
             MainPhotoBean mainPhotoBean = new Gson().fromJson(response, MainPhotoBean.class);
             bannerlist = mainPhotoBean.getMatchlist();
             myBannerView.set(bannerlist);

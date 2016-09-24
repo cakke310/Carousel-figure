@@ -8,10 +8,7 @@
  */
 package com.carousel;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -24,10 +21,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.carousel.bean.MainPhotoBean;
-import com.carousel.bean.MatchListBean;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 
@@ -68,11 +63,15 @@ public class BannerView extends FrameLayout {
 		dotLayout = (LinearLayout) findViewById(R.id.dotLayout);
 		title = (TextView) findViewById(R.id.title);
 		autoPlayTask = new AutoPlayTask();
+
 	}
 
 	public void set(List<MainPhotoBean.MatchListBean> data) {
 		elements.clear();
 		elements.addAll(data);
+		for(int i=0; i<elements.size(); i++){
+			LogUtil.e(elements.get(i).getImgurl()+"----"+elements.get(i).getTitle());
+		}
 		if (data.size() > 0) {
 			initUI(data);
 			if (data.size() > 1) {
@@ -95,6 +94,7 @@ public class BannerView extends FrameLayout {
 				}
 		}
 		viewPager.setAdapter(new MyPagerAdapter());
+		viewPager.setCurrentItem(1000);
 		if(elements.size()>1) {
 			viewPager.setOnPageChangeListener(new MyPageChangeListener());
 		}
@@ -103,7 +103,8 @@ public class BannerView extends FrameLayout {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				if (event.getAction() == MotionEvent.ACTION_DOWN
+						|| event.getAction() == MotionEvent.ACTION_CANCEL) {
 					autoPlayTask.stop();
 				} else if (event.getAction() == MotionEvent.ACTION_UP) {
 					autoPlayTask.start();
@@ -178,15 +179,14 @@ public class BannerView extends FrameLayout {
 		@Override
 		public Object instantiateItem(View container, int position) {
 			// TODO Auto-generated method stub
-			int i = position % elements.size();
+
+			position %= elements.size();
 			SimpleDraweeView photoView = new SimpleDraweeView(getContext());
 			DraweeController controller = ConfigConstants.getDraweeController(
-					ConfigConstants.getImageRequest(photoView, DosnapApp.apiHost + elements.get(i).getImgurl()), photoView);
+					ConfigConstants.getImageRequest(photoView, DosnapApp.apiHost + elements.get(position).getImgurl()), photoView);
 			photoView.setController(controller);
-			elements.get(i >= elements.size() ? i % elements.size() : i);//防止错乱
 			((ViewPager) container).addView(photoView);
-			String mTitle = elements.get(i).getTitle();
-			title.setText(mTitle);
+
 			return photoView;
 		}
 
@@ -208,50 +208,7 @@ public class BannerView extends FrameLayout {
 		}
 	}
 
-	private OnClickListener mListener = new OnClickListener() {
-		public void onClick(View v) {
-//			Intent intent = new Intent(v.getContext(), ActivityActivity.class);
-//			Bundle b = new Bundle();
-//			b.putString("mid",v.getTag().toString());
-//			b.putInt("eventtype", Integer.parseInt(v.getTag(R.id.tag_id).toString()));
-//			intent.putExtras(b);
-//			((Activity) v.getContext()).startActivityForResult(intent, DosnapApp.ACTIVITY_ACTIVITY);
-		}
-	};
 
-	private OnClickListener aListener = new OnClickListener() {
-		public void onClick(View v) {
-//			Intent intent = new Intent(v.getContext(), ArticleActivity.class);
-//			Bundle b = new Bundle();
-//			b.putString("article",v.getTag().toString());
-//			intent.putExtras(b);
-//			((Activity) v.getContext()).startActivityForResult(intent, DosnapApp.ACTIVITY_ACTIVITY);
-		}
-	};
-
-	private OnClickListener topicListener = new OnClickListener() {
-		public void onClick(View v) {
-//			Intent intent = new Intent(v.getContext(), TopicActivity.class);
-//			Bundle b = new Bundle();
-//			b.putString("article",v.getTag().toString());
-//			intent.putExtras(b);
-//			((Activity) v.getContext()).startActivityForResult(intent, DosnapApp.ACTIVITY_ACTIVITY);
-		}
-	};
-
-	private OnClickListener h5Listener = new OnClickListener() {
-		public void onClick(View v) {
-//			Intent intent = new Intent(v.getContext(), H5Activity.class);
-//			Bundle b = new Bundle();
-//			b.putString("article",v.getTag().toString());
-//			intent.putExtras(b);
-//			((Activity) v.getContext()).startActivityForResult(intent, DosnapApp.ACTIVITY_ACTIVITY);
-		}
-	};
-	private OnClickListener otherListener = new OnClickListener() {
-		public void onClick(View v) {
-		}
-	};
 
 	/**
 	 * ViewPager的监听器 当ViewPager中页面的状态发生改变时调用
@@ -271,18 +228,9 @@ public class BannerView extends FrameLayout {
 				case 2:// 界面切换中
 					isAutoPlay = true;
 					break;
-				case 0:// 滑动结束，即切换完毕或者加载完毕
-					// 当前为最后一张，此时从右向左滑，则切换到第一张
-					if (viewPager.getCurrentItem() == viewPager.getAdapter()
-							.getCount() - 1 && !isAutoPlay) {
-						viewPager.setCurrentItem(0);
-					}
-					// 当前为第一张，此时从左向右滑，则切换到最后一张
-					else if (viewPager.getCurrentItem() == 0 && !isAutoPlay) {
-						viewPager.setCurrentItem(viewPager.getAdapter().getCount() - 1);
-					}
-					break;
+
 			}
+//
 		}
 
 		@Override
@@ -293,6 +241,9 @@ public class BannerView extends FrameLayout {
 		@Override
 		public void onPageSelected(int pos) {
 			// TODO Auto-generated method stub
+			String mTitle = elements.get(pos % elements.size()).getTitle();
+			title.setText(mTitle);
+
 			for (int i = 0; i < dotLayout.getChildCount(); i++) {
 				if (i == pos % elements.size()) {
 					((ImageView) dotLayout.getChildAt(i))
